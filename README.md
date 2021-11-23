@@ -189,6 +189,8 @@ on the `pNext` chain.
     NVVK_CHECK(vkCreateSemaphore(g_ctx, &semaphoreInfo, nullptr, &s_computeDoneTimelineSemaphore));
     NVVK_CHECK(vkCreateSemaphore(g_ctx, &semaphoreInfo, nullptr, &s_graphicsDoneTimelineSemaphore));
 
+**NOTE:** [Read this file alone to eliminate horizontal scrolling.](https://github.com/nvpro-samples/vk_timeline_semaphore/blob/main/README.md#Implementation)
+
 These semaphores are passed as parameters of a
 [`VkQueueSubmit`](https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkQueueSubmit.html)
 in the same way as binary semaphores, except that there is an
@@ -232,8 +234,9 @@ command buffer for the same batch. So, the graphics work for a batch
 can proceed immediately after the compute work for the batch is
 complete.
 
-    computeSignalTimelineValue = s_upcomingTimelineValue;  // Recall pointer to this value in VkTimelineSemaphoreSubmitInfo above
+    computeSignalTimelineValue = s_upcomingTimelineValue;
     NVVK_CHECK(vkQueueSubmit(g_computeQueue, 1, &computeSubmitInfo, VkFence{}));
+    // Recall computeSignalTimelineValue is pointed-to by VkTimelineSemaphoreSubmitInfo, above.
     // ...
     graphicsWaitTimelineValue = s_upcomingTimelineValue;
     // ...
@@ -296,7 +299,8 @@ before any `McubesChunk`-drawing commands.
     // No queue ownership transfer -- using VK_SHARING_MODE_CONCURRENT.
     VkMemoryBarrier computeToGraphicsBarrier = {VK_STRUCTURE_TYPE_MEMORY_BARRIER, nullptr, VK_ACCESS_SHADER_WRITE_BIT,
                                                 VK_ACCESS_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_SHADER_READ_BIT};
-    vkCmdPipelineBarrier(batchGraphicsCmdBuf, computeStage, readGeometryArrayStage, 0, 1, &computeToGraphicsBarrier, 0, 0, 0, 0);
+    vkCmdPipelineBarrier(batchGraphicsCmdBuf, computeStage, readGeometryArrayStage, 0, 1, &computeToGraphicsBarrier, 0,
+                         0, 0, 0);
 
 *Note that this is not just a theoretical concern!* The author failed
  to include this barrier at first, and experienced sporadic

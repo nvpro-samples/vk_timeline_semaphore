@@ -1,0 +1,41 @@
+// Copyright 2021 NVIDIA CORPORATION
+// SPDX-License-Identifier: Apache-2.0
+//
+// Compute shader for filling in the 3D image, expected to be of size MCUBES_IMAGE_EDGE_LENGTH_TEXELS^3
+// Fill with EQUATION(x, y, z, t), where
+// x,y,z = offset + texelCoord * coordScale.
+// Dispatch with x,y = MCUBES_IMAGE_EDGE_LENGTH_TEXELS, z=1
+#version 460
+#include "mcubes_params.h"
+
+float square(float x)
+{
+  return x * x;
+}
+
+#ifndef EQUATION
+#define EQUATION(x, y, z, t) (x * x + y * y + z * z - t)
+#endif
+
+layout(local_size_x = MCUBES_CHUNK_EDGE_LENGTH_TEXELS) in;
+
+layout(set = 0, binding = MCUBES_IMAGE_BINDING) uniform writeonly image3D outputImage;
+
+layout(push_constant) uniform PushConstantBlock
+{
+  McubesParams pushConstant;
+};
+
+void main()
+{
+  uint tx = gl_LocalInvocationID.x;
+  uint ty = gl_WorkGroupID.x;  // not .y;
+  uint tz = gl_WorkGroupID.y;  // not .z;
+
+  vec3  coord = pushConstant.offset + pushConstant.size * (vec3(tx, ty, tz) / MCUBES_CHUNK_EDGE_LENGTH_CELLS);
+  vec4  texelValue;
+  float r      = sqrt(coord.x * coord.x + coord.z * coord.z);
+  float theta  = atan(coord.z, coord.x);
+  texelValue.x = EQUATION(coord.x, coord.y, coord.z, pushConstant.t);
+  imageStore(outputImage, ivec3(tx, ty, tz), texelValue);
+}

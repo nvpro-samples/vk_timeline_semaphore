@@ -117,7 +117,7 @@ void Gui::doFrame()
     {
       ImGui::SetNextWindowPos({0, 0});
       ImGui::SetNextWindowSize({dpiScale * 300, dpiScale * 800});
-      ImGui::SetNextTreeNodeOpen(true);
+      ImGui::SetNextItemOpen(true);
     }
     ImGui::Begin("Toggle UI [u]");
     ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
@@ -128,7 +128,7 @@ void Gui::doFrame()
 
     if(m_wantOpenEquationHeader)
     {
-      ImGui::SetNextTreeNodeOpen(true);
+      ImGui::SetNextItemOpen(true);
       m_wantOpenEquationHeader = false;
     }
     if(ImGui::CollapsingHeader("Equation [e]"))

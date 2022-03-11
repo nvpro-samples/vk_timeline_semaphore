@@ -43,7 +43,7 @@ file(GLOB SHADER_FILES shaders/*.vert shaders/*.frag shaders/*.comp shaders/*.gl
 #####################################################################################
 # Executable
 #
-add_executable(${PROJNAME} ${SOURCE_FILES} ${SHADER_FILES} ${HEADER_FILES})
+add_executable(${PROJNAME} ${SOURCE_FILES} ${COMMON_SOURCE_FILES} ${SHADER_FILES} ${HEADER_FILES})
 
 #####################################################################################
 # Source code groups

@@ -352,8 +352,8 @@ static void cmdBeginDynamicViewportScissorRenderPass(VkCommandBuffer cmdBuf)
   viewport.y        = 0.0f;
   viewport.minDepth = 0.0f;
   viewport.maxDepth = 1.0f;
-  viewport.width    = s_framebufferWidth;
-  viewport.height   = s_framebufferHeight;
+  viewport.width    = float(s_framebufferWidth);
+  viewport.height   = float(s_framebufferHeight);
   auto     ix       = int32_t(viewport.x);
   auto     iy       = int32_t(viewport.y);
   auto     iw       = uint32_t(viewport.width);

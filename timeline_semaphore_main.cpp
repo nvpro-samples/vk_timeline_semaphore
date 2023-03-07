@@ -283,8 +283,8 @@ static std::vector<McubesDebugViewPushConstant> makeDebugColors(int             
   {
     case chunkDebugViewBatch:
       tmp        = float(batchNumber % 5u);
-      rb         = tmp == 0 ? 0.0 : tmp == 1 ? 0.75 : 1.0;
-      g          = tmp == 2 ? 0.0 : tmp == 3 ? 0.75 : 1.0;
+      rb         = tmp == 0 ? 0.0f : tmp == 1 ? 0.75f : 1.0f;
+      g          = tmp == 2 ? 0.0f : tmp == 3 ? 0.75f : 1.0f;
       tmp        = powf(0.75f, float((batchNumber / 5u) % 8u));
       pc.red     = rb * tmp;
       pc.green   = g * tmp;
@@ -297,13 +297,13 @@ static std::vector<McubesDebugViewPushConstant> makeDebugColors(int             
       for(uint32_t i = 0; i < chunkCount; ++i)
       {
         // Color based on relative index from first chunk used in frame, otherwise, we get massive flickering.
-        uint32_t chunkIndex = chunkPointerArray[i] - g_mcubesChunkArray;
+        ptrdiff_t chunkIndex = chunkPointerArray[i] - g_mcubesChunkArray;
         assert(chunkIndex < MCUBES_CHUNK_COUNT);
-        int32_t relativeChunkIndex = int32_t(chunkIndex - firstChunkUsed);
+        int32_t relativeChunkIndex = int32_t(chunkIndex) - int32_t(firstChunkUsed);
         relativeChunkIndex += relativeChunkIndex < 0 ? MCUBES_CHUNK_COUNT : 0;
         static_assert(MCUBES_CHUNK_COUNT <= 25, "Colors not guaranteed to be unique");
-        rb         = powf(0.5f, relativeChunkIndex % 5);
-        g          = powf(0.5f, relativeChunkIndex / 5);
+        rb         = powf(0.5f, float(relativeChunkIndex % 5));
+        g          = powf(0.5f, float(relativeChunkIndex / 5));
         pc.red     = rb;
         pc.green   = g;
         pc.blue    = rb;

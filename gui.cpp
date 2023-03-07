@@ -195,9 +195,9 @@ std::vector<McubesParams> Gui::getMcubesJobs() const
   }
 
   // Convert target cell counts to job count.
-  int xJobs = std::max(int(roundf(double(targetCellCounts.x) / MCUBES_CHUNK_EDGE_LENGTH_CELLS)), 1);
-  int yJobs = std::max(int(roundf(double(targetCellCounts.y) / MCUBES_CHUNK_EDGE_LENGTH_CELLS)), 1);
-  int zJobs = std::max(int(roundf(double(targetCellCounts.z) / MCUBES_CHUNK_EDGE_LENGTH_CELLS)), 1);
+  int xJobs = std::max(int(roundf(float(targetCellCounts.x) / MCUBES_CHUNK_EDGE_LENGTH_CELLS)), 1);
+  int yJobs = std::max(int(roundf(float(targetCellCounts.y) / MCUBES_CHUNK_EDGE_LENGTH_CELLS)), 1);
+  int zJobs = std::max(int(roundf(float(targetCellCounts.z) / MCUBES_CHUNK_EDGE_LENGTH_CELLS)), 1);
 
   nvmath::vec3f wholeSize = m_bboxHigh - m_bboxLow;
   nvmath::vec3f jobCounts = nvmath::vec3f(xJobs, yJobs, zJobs);

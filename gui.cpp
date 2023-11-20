@@ -1,5 +1,8 @@
 // Copyright 2021 NVIDIA CORPORATION
 // SPDX-License-Identifier: Apache-2.0
+
+#include <glm/glm.hpp>
+
 #include "gui.hpp"
 
 #include <math.h>
@@ -7,11 +10,15 @@
 
 #include "nvh/cameramanipulator.hpp"
 #include "nvh/container_utils.hpp"
-#include "nvmath/nvmath.h"
 #include "nvvk/error_vk.hpp"
 
 #include "mcubes_chunk.hpp"
 #include "timeline_semaphore_main.hpp"
+
+#include <glm/gtc/type_ptr.hpp>
+#include <iostream>
+#include "nvmath/nvmath.h"
+
 
 static const float nearPlane = 65536.0f, farPlane = 1.0f / 65536.0f;  // Reversed Z
 
@@ -57,14 +64,14 @@ void Gui::cmdInit(VkCommandBuffer cmdBuf, VkRenderPass renderPass, uint32_t subp
   ImGuiH::setStyle(true);
 
   VkDescriptorPoolSize       poolSizes[] = {VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_SAMPLER, 1},
-                                      VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1},
-                                      VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1}};
+                                            VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1},
+                                            VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1}};
   VkDescriptorPoolCreateInfo poolInfo    = {VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-                                         nullptr,
-                                         VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
-                                         arraySize(poolSizes),
-                                         arraySize(poolSizes),
-                                         poolSizes};
+                                            nullptr,
+                                            VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+                                            arraySize(poolSizes),
+                                            arraySize(poolSizes),
+                                            poolSizes};
   assert(m_pool == VK_NULL_HANDLE);
   NVVK_CHECK(vkCreateDescriptorPool(g_ctx, &poolInfo, nullptr, &m_pool));
 
@@ -79,6 +86,8 @@ void Gui::cmdInit(VkCommandBuffer cmdBuf, VkRenderPass renderPass, uint32_t subp
                                  g_swapChain.getImageCount(),
                                  g_swapChain.getImageCount(),
                                  VK_SAMPLE_COUNT_1_BIT,
+                                 false,
+                                 VK_FORMAT_UNDEFINED,
                                  nullptr,
                                  [](VkResult err) { NVVK_CHECK(err); }};
 
@@ -158,19 +167,18 @@ CameraTransforms Gui::getTransforms(uint32_t windowWidth, uint32_t windowHeight)
 {
   float aspectRatio = float(windowWidth) / float(windowHeight);
 
-  auto          camera = m_cameraManipulator.getCamera();
-  nvmath::vec3f up     = camera.up;
-  nvmath::vec3f center = camera.ctr;
-  nvmath::mat4  view   = nvmath::look_at(camera.eye, center, up);
-  nvmath::mat4  proj   = nvmath::perspectiveVK(camera.fov, aspectRatio, nearPlane, farPlane);
+  auto      camera = m_cameraManipulator.getCamera();
+  glm::mat4 view   = glm::lookAt(camera.eye, camera.ctr, camera.up);
+  glm::mat4 proj   = glm::perspectiveRH_ZO(glm::radians(camera.fov), aspectRatio, nearPlane, farPlane);
+  proj[1][1] *= -1;
 
   CameraTransforms transforms;
   transforms.view            = view;
   transforms.proj            = proj;
   transforms.viewProj        = proj * view;
-  transforms.viewInverse     = nvmath::invert(view);
-  transforms.projInverse     = nvmath::invert(proj);
-  transforms.viewProjInverse = nvmath::invert(transforms.viewProj);
+  transforms.viewInverse     = glm::inverse(view);
+  transforms.projInverse     = glm::inverse(proj);
+  transforms.viewProjInverse = glm::inverse(transforms.viewProj);
 
   transforms.colorByNormalAmount = m_colorByNormalAmount;
   return transforms;
@@ -185,7 +193,7 @@ std::vector<McubesParams> Gui::getMcubesJobs() const
 {
   std::vector<McubesParams> jobs;
 
-  nvmath::vec3i targetCellCounts = nvmath::nv_clamp(m_targetCellCounts, 0, 1024);
+  glm::ivec3 targetCellCounts = glm::clamp(m_targetCellCounts, 0, 1024);
   if(targetCellCounts != m_targetCellCounts && !m_didTargetCellCountWarning)
   {
     fprintf(stderr,
@@ -199,8 +207,8 @@ std::vector<McubesParams> Gui::getMcubesJobs() const
   int yJobs = std::max(int(roundf(float(targetCellCounts.y) / MCUBES_CHUNK_EDGE_LENGTH_CELLS)), 1);
   int zJobs = std::max(int(roundf(float(targetCellCounts.z) / MCUBES_CHUNK_EDGE_LENGTH_CELLS)), 1);
 
-  nvmath::vec3f wholeSize = m_bboxHigh - m_bboxLow;
-  nvmath::vec3f jobCounts = nvmath::vec3f(xJobs, yJobs, zJobs);
+  glm::vec3 wholeSize = m_bboxHigh - m_bboxLow;
+  glm::vec3 jobCounts = glm::vec3(xJobs, yJobs, zJobs);
 
   // Trying to be careful to be watertight.
   for(int z = 0; z < zJobs; ++z)
@@ -209,12 +217,12 @@ std::vector<McubesParams> Gui::getMcubesJobs() const
     {
       for(int x = 0; x < xJobs; ++x)
       {
-        McubesParams  params;
-        nvmath::vec3f low  = m_bboxLow + wholeSize * (nvmath::vec3f(x, y, z) / jobCounts);
-        nvmath::vec3f high = m_bboxLow + wholeSize * (nvmath::vec3f(x + 1, y + 1, z + 1) / jobCounts);
-        params.offset      = low;
-        params.t           = m_t;
-        params.size        = high - low;
+        McubesParams params;
+        glm::vec3    low  = m_bboxLow + wholeSize * (glm::vec3(x, y, z) / jobCounts);
+        glm::vec3    high = m_bboxLow + wholeSize * (glm::vec3(x + 1, y + 1, z + 1) / jobCounts);
+        params.offset     = low;
+        params.t          = m_t;
+        params.size       = high - low;
         jobs.push_back(params);
       }
     }
@@ -224,7 +232,10 @@ std::vector<McubesParams> Gui::getMcubesJobs() const
 
 void Gui::resetCamera()
 {
-  m_cameraManipulator.setLookat(m_bboxHigh, (m_bboxLow + m_bboxHigh) * 0.5f, {0, 1, 0});
+  glm::vec3 bboxHigh = glm::make_vec3(&m_bboxHigh.x);
+  glm::vec3 bboxLow  = glm::make_vec3(&m_bboxLow.x);
+
+  m_cameraManipulator.setLookat(bboxHigh, (bboxLow + bboxHigh) * 0.5f, {0, 1, 0});
 }
 
 void Gui::focusIfFlag(bool* pFlag)

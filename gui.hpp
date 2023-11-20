@@ -12,10 +12,10 @@
 #include "nvvk/context_vk.hpp"
 // #include "nvvk/profiler_vk.hpp"
 
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_vulkan.h"
-#include "imgui_helper.h"
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_vulkan.h>
+#include "imgui/imgui_helper.h"
 
 #include "shaders/camera_transforms.h"
 #include "shaders/mcubes_params.h"
@@ -54,11 +54,11 @@ class Gui
   bool m_wantFocusBoundingBox   = false;
 
   // worldspace bounding box of region to perform marching cubes on.
-  nvmath::vec3f m_bboxLow{-2, -2, -2}, m_bboxHigh{+2, +2, +2};
+  glm::vec3 m_bboxLow{-2, -2, -2}, m_bboxHigh{+2, +2, +2};
 
   // Number of marching cubes cells along each axis (will be rounded due to granularity of McubesGeometry[]).
-  nvmath::vec3i m_targetCellCounts{508, 508, 508};
-  mutable bool  m_didTargetCellCountWarning = false;
+  glm::ivec3   m_targetCellCounts{508, 508, 508};
+  mutable bool m_didTargetCellCountWarning = false;
 
 public:
   // These are parameters set modified by the gui controls and used by
@@ -130,8 +130,8 @@ private:
 };
 
 // Values for m_chunkDebugViewMode. See also chunkDebugViewLabels[] in gui.cpp
-static constexpr int chunkDebugViewOff = 0;
-static constexpr int chunkDebugViewBounds = 1;
-static constexpr int chunkDebugViewBatch = 2;
+static constexpr int chunkDebugViewOff        = 0;
+static constexpr int chunkDebugViewBounds     = 1;
+static constexpr int chunkDebugViewBatch      = 2;
 static constexpr int chunkDebugViewChunkIndex = 3;
-static constexpr int chunkDebugViewModeCount = 4;
+static constexpr int chunkDebugViewModeCount  = 4;

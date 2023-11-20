@@ -5,11 +5,11 @@
 #define NVPRO_SAMPLES_VK_TIMELINE_SEMAPHORE_SHADERS_SRGB_H_
 
 #ifdef __cplusplus
-#include "nvmath/nvmath.h"
+#include <glm/glm.hpp>
 #include "nvmath/nvmath_glsltypes.h"
 #define uint uint32_t
-#define vec4 nvmath::vec4f
-#define clamp nvmath::nv_clamp
+#define vec4 glm::vec4
+#define clamp glm::clamp
 #endif
 
 // Convert 8-bit sRGB red/green/blue component value to linear.

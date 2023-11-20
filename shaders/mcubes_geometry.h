@@ -6,9 +6,8 @@
 #include "mcubes_params.h"
 
 #ifdef __cplusplus
-#include <nvmath/nvmath_glsltypes.h>  // emulate glsl types in C++
 #include <stdint.h>
-#define VEC3 nvmath::vec3f
+#define VEC3 glm::vec3
 #else
 #define VEC3 vec3
 #endif

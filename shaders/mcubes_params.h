@@ -31,8 +31,7 @@
  * (MCUBES_CHUNK_EDGE_LENGTH_TEXELS / MCUBES_GEOMETRY_EDGE_LENGTH))
 
 #ifdef __cplusplus
-#include <nvmath/nvmath_glsltypes.h>  // emulate glsl types in C++
-#define VEC3 nvmath::vec3f
+#define VEC3 glm::vec3
 #else
 #define VEC3 vec3
 #endif

@@ -1,5 +1,8 @@
 // Copyright 2021 NVIDIA CORPORATION
 // SPDX-License-Identifier: Apache-2.0
+
+#include <glm/glm.hpp>
+
 #include "timeline_semaphore_main.hpp"
 
 #include <cassert>
@@ -402,7 +405,7 @@ static void computeDrawCommandsTwoQueues(const Gui* pGui)
                                      &s_graphicsDoneTimelineSemaphore};
 
   // Split the list of jobs into batches of up to batchSize McubesChunk jobs.
-  uint32_t batchSize  = nvmath::nv_clamp<uint32_t>(pGui->m_batchSize, 1u, MCUBES_MAX_CHUNKS_PER_BATCH);
+  uint32_t batchSize  = glm::clamp<uint32_t>(pGui->m_batchSize, 1u, MCUBES_MAX_CHUNKS_PER_BATCH);
   uint32_t batchCount = uint32_t(paramsList.size() + batchSize - 1u) / batchSize;
   uint32_t firstChunkUsed;
 
@@ -564,7 +567,7 @@ static void computeDrawCommandsGctOnly(const Gui* pGui)
       VK_STRUCTURE_TYPE_SUBMIT_INFO, nullptr, 0, nullptr, nullptr, 1, &gctBatchCmdBuf, 0, nullptr};
 
   // Split the list of jobs into batches of up to batchSize McubesChunk jobs.
-  uint32_t batchSize  = nvmath::nv_clamp<uint32_t>(pGui->m_batchSize, 1u, MCUBES_MAX_CHUNKS_PER_BATCH);
+  uint32_t batchSize  = glm::clamp<uint32_t>(pGui->m_batchSize, 1u, MCUBES_MAX_CHUNKS_PER_BATCH);
   uint32_t batchCount = uint32_t(paramsList.size() + batchSize - 1u) / batchSize;
   uint32_t firstChunkUsed;
 

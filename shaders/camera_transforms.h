@@ -6,14 +6,13 @@
 #define VK_NV_INHERITED_SCISSOR_VIEWPORT_CAMERA_TRANSFORMS_H_
 
 #ifdef __cplusplus
-#include <nvmath/nvmath_glsltypes.h>  // emulate glsl types in C++
 #include <stdint.h>
 #endif
 
 struct CameraTransforms
 {
 #ifdef __cplusplus
-  using mat4 = nvmath::mat4;
+  using mat4 = glm::mat4;
   using uint = uint32_t;
 #endif
 

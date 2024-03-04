@@ -75,23 +75,23 @@ void Gui::cmdInit(VkCommandBuffer cmdBuf, VkRenderPass renderPass, uint32_t subp
   assert(m_pool == VK_NULL_HANDLE);
   NVVK_CHECK(vkCreateDescriptorPool(g_ctx, &poolInfo, nullptr, &m_pool));
 
-  ImGui_ImplVulkan_InitInfo info{g_ctx.m_instance,
-                                 g_ctx.m_physicalDevice,
-                                 g_ctx.m_device,
-                                 g_ctx.m_queueGCT,
-                                 g_ctx.m_queueGCT,
-                                 VK_NULL_HANDLE,  // No need for pipeline cache for simple sample.
-                                 m_pool,
-                                 subpass,
-                                 g_swapChain.getImageCount(),
-                                 g_swapChain.getImageCount(),
-                                 VK_SAMPLE_COUNT_1_BIT,
-                                 false,
-                                 VK_FORMAT_UNDEFINED,
-                                 nullptr,
-                                 [](VkResult err) { NVVK_CHECK(err); }};
+  ImGui_ImplVulkan_InitInfo info{};
+  info.Instance            = g_ctx.m_instance;
+  info.PhysicalDevice      = g_ctx.m_physicalDevice;
+  info.Device              = g_ctx.m_device;
+  info.QueueFamily         = g_ctx.m_queueGCT.familyIndex;
+  info.Queue               = g_ctx.m_queueGCT.queue;
+  info.DescriptorPool      = m_pool;
+  info.RenderPass          = renderPass;
+  info.Subpass             = subpass;
+  info.MinImageCount       = g_swapChain.getImageCount();
+  info.ImageCount          = g_swapChain.getImageCount();
+  info.MSAASamples         = VK_SAMPLE_COUNT_1_BIT;
+  info.UseDynamicRendering = false;
+  info.Allocator           = nullptr;
+  info.CheckVkResultFn     = [](VkResult err) { NVVK_CHECK(err); };
 
-  ImGui_ImplVulkan_Init(&info, renderPass);
+  ImGui_ImplVulkan_Init(&info);
   ImGui_ImplVulkan_CreateFontsTexture();
 
   ImGui_ImplGlfw_InitForVulkan(g_window, false);

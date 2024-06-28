@@ -381,7 +381,7 @@ overlapped with the (blue) graphics shader work.
 ## Acknowledgement
 
 Thank you to Christoph Kubisch for spotting the missing memory
-barrier, Neil Bickford for edits and review.
+barrier, and Nia Bickford for edits and review.
 
 ## License
 
